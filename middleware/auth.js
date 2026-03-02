@@ -4,10 +4,10 @@ const User = require("../models/User");
 exports.protect = async (req, res, next) => {
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-        token = req.headers.authorization.split(" ")[1];
+        token = req.headers.authorization.split(' ')[1];
     }
 
-    if (!token || token === 'null') {
+    if (!token || token == 'null') {
         return res.status(401).json({
             success: false,
             message: "Unauthorized: No token provided"
@@ -19,7 +19,7 @@ exports.protect = async (req, res, next) => {
         req.user = await User.findById(decoded.id).select("-password");
         next();
     } catch (error) {
-        console.error(error);
+        console.log(error.stack);
         res.status(401).json({
             success: false,
             message: "Unauthorized: Invalid token"
@@ -32,7 +32,7 @@ exports.authorize = (...roles) => {
         if (!roles.includes(req.user.role)) {
             return res.status(403).json({
                 success: false,
-                message: `Forbidden: You (${req.user.role}) do not have permission to access this resource`
+                message: `User role (${req.user.role}) is not authorized to access this route`
             });
         }
         next();

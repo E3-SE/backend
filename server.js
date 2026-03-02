@@ -1,44 +1,68 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const helmet = require("helmet");
-const swaggerUi = require("swagger-ui-express");
-const { xss } = require("express-xss-sanitizer");
-
-dotenv.config({
-    path: "./config/config.env"
-});
-
-const limiter = require("./middleware/rateLimiter");
-const swaggerSpec = require("./config/swagger");
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
+
+//Security middleware
+const expressMongoSanitize = require("@exortek/express-mongo-sanitize");
+const helmet = require("helmet");
+const { xss } = require("express-xss-sanitizer");
+const limiter = require("./middleware/rateLimiter");
+const hpp = require("hpp");
+const cors = require("cors");
+
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
+
+//Load env vars
+dotenv.config({ path: "./config/config.env" });
+
+//Connect to database
+connectDB();
 
 //Route files
 const healthRoutes = require("./routes/health");
 const authRoutes = require("./routes/auth");
 const reservations = require("./routes/reservations");
 const massages = require('./routes/massages');
-connectDB();
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
-app.use(limiter);
-app.use(xss());
-
-app.get("/", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "API Server is running"
-    });
-});
+//Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+//Body parser
+app.use(express.json());
+
+//Sanitize data
+app.use(expressMongoSanitize());
+
+app.use(express.urlencoded({ extended: true }));
+
+//Prevent XSS
+app.use(xss());
+
+//Rate limiting
+app.use(limiter);
+
+//Prevent parameter pollution
+app.use(hpp());
+
+//Enable CORS
+app.use(cors());
+
+//Security headers
+app.use(helmet());
+
+//Cookie parser
+app.use(cookieParser());
+
+//Mount routers
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/reservations", reservations)
 app.use('/api/massages', massages);
+
 // Global 404 and 500 error handlers
 app.use((req, res, next) => {
     res.status(404).json({
@@ -46,6 +70,7 @@ app.use((req, res, next) => {
         message: `${req.originalUrl} does not exist`
     });
 });
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({
@@ -55,9 +80,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}, in ${process.env.NODE_ENV} mode.`);
-});
+const server = app.listen(PORT, console.log('Server running in ', process.env.NODE_ENV, ' mode on port ', PORT));
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err, promise) => {

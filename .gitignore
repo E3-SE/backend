@@ -7,3 +7,6 @@ tests/api-tester.html
 tests/frontend.html
 logs.txt
 tests/nginx.conf
+
+#ignore tests
+tests/*

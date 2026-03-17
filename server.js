@@ -29,6 +29,7 @@ const healthRoutes = require("./routes/health");
 const authRoutes = require("./routes/auth");
 const reservations = require("./routes/reservations");
 const massages = require('./routes/massages');
+const users = require('./routes/users');
 
 const app = express();
 
@@ -67,6 +68,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/reservations", reservations);
 app.use('/api/massages', massages);
 app.use('/api/massages/:massageId/reservations', reservations);
+app.use('/api/users', users);
 // Global 404 and 500 error handlers
 app.use((req, res, next) => {
     res.status(404).json({

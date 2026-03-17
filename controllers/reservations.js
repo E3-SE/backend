@@ -11,6 +11,9 @@ exports.getReservations = async (req, res, next) => {
         query = Reservation.find({ user: req.user.id }).populate({
             path: 'massage',
             select: 'name province tel'
+        }).populate({
+            path: 'user',
+            select: 'name tel email'
         });
     }
     else {
@@ -20,12 +23,18 @@ exports.getReservations = async (req, res, next) => {
             query = Reservation.find({ massage: req.params.massageId }).populate({
                 path: 'massage',
                 select: 'name province tel'
+            }).populate({
+                path: 'user',
+                select: 'name tel email'
             });
         }
         else {
             query = Reservation.find().populate({
                 path: 'massage',
                 select: 'name province tel'
+            }).populate({
+                path: 'user',
+                select: 'name tel email'
             });
         }
     }
@@ -73,6 +82,9 @@ exports.getReservation = async (req, res, next) => {
         const reservation = await Reservation.findById(req.params.id).populate({
             path: 'massage',
             select: 'name province tel'
+        }).populate({
+            path: 'user',
+            select: 'name tel email'
         });
 
         if (!reservation) {

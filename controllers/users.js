@@ -1,5 +1,7 @@
 const User = require("../models/User");
 
+const TEL_REGEX = /^\d{3}-\d{3}-\d{4}$/;
+
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private (Admin)
@@ -57,7 +59,7 @@ exports.createUser = async (req, res, next) => {
     try {
         const { name, tel, email, password, role } = req.body;
 
-        const telRegex = /^\d{3}-\d{3}-\d{4}$/;
+        const telRegex = TEL_REGEX;
         if (!telRegex.test(tel)) {
             return res.status(400).json({
                 success: false,
@@ -93,8 +95,7 @@ exports.updateUser = async (req, res, next) => {
 
         if (name !== undefined) user.name = name;
         if (tel !== undefined) {
-            const telRegex = /^\d{3}-\d{3}-\d{4}$/;
-            if (!telRegex.test(tel)) {
+            if (!TEL_REGEX.test(tel)) {
                 return res.status(400).json({
                     success: false,
                     message: "Error: Telephone number must be in the format xxx-xxx-xxxx"

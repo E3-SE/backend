@@ -39,7 +39,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json());
 
 //Sanitize data
-app.use(expressMongoSanitize());
+// app.use(expressMongoSanitize());
 
 app.use(express.urlencoded({ extended: true }));
 
